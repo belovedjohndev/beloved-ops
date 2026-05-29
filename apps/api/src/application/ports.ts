@@ -1,5 +1,9 @@
 import type {
   ActivityEventDto,
+  ClientDetailDto,
+  ClientDto,
+  ClientListItemDto,
+  ConvertLeadToClientResponse,
   CreateLeadFollowUpRequest,
   CreateLeadNoteRequest,
   CreateLeadRequest,
@@ -57,6 +61,11 @@ export type LeadRepository = {
     stage: LeadStage,
     lostReason: string | null
   ): Promise<LeadDto | null>;
+  markLeadConverted(
+    context: TenantContext,
+    leadId: string,
+    clientId: string
+  ): Promise<LeadDto | null>;
   addNote(
     context: TenantContext,
     leadId: string,
@@ -77,8 +86,34 @@ export type LeadRepository = {
   getDashboardSummary(context: TenantContext): Promise<DashboardSummaryDto>;
 };
 
+export type CreateClientFromLeadInput = {
+  name: string;
+  companyName: string | null;
+  websiteUrl: string | null;
+  sourceLeadId: string;
+};
+
+export type CreatePrimaryContactInput = {
+  clientId: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  role: string | null;
+};
+
+export type ClientRepository = {
+  listClients(context: TenantContext): Promise<ClientListItemDto[]>;
+  getClientDetail(context: TenantContext, clientId: string): Promise<ClientDetailDto | null>;
+  createClientFromLead(context: TenantContext, input: CreateClientFromLeadInput): Promise<ClientDto>;
+  createPrimaryContactFromLead(
+    context: TenantContext,
+    input: CreatePrimaryContactInput
+  ): Promise<ConvertLeadToClientResponse["primaryContact"]>;
+};
+
 export type TransactionRepositories = {
   leads: LeadRepository;
+  clients: ClientRepository;
 };
 
 export type UnitOfWork = {
@@ -87,5 +122,6 @@ export type UnitOfWork = {
 
 export type ApplicationDependencies = {
   leads: LeadRepository;
+  clients: ClientRepository;
   unitOfWork: UnitOfWork;
 };

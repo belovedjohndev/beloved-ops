@@ -64,7 +64,8 @@ export type LeadActivityEventType =
   | "lead.follow_up_scheduled"
   | "lead.follow_up_completed"
   | "lead.marked_won"
-  | "lead.marked_lost";
+  | "lead.marked_lost"
+  | "lead_converted_to_client";
 
 export function isLeadStage(value: string): value is LeadStage {
   return leadStages.includes(value as LeadStage);

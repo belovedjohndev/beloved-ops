@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { DashboardSummaryDto } from "@belovedops/shared";
 import { getDashboardSummary } from "./api/client.js";
 import { DashboardPage } from "./pages/DashboardPage.js";
+import { ClientDetailPage } from "./pages/ClientDetailPage.js";
+import { ClientsPage } from "./pages/ClientsPage.js";
 import { LeadDetailPage } from "./pages/LeadDetailPage.js";
 import { LeadsPage } from "./pages/LeadsPage.js";
 
@@ -61,6 +63,11 @@ export function App() {
     return match?.[1] ?? null;
   }, [path]);
 
+  const clientId = useMemo(() => {
+    const match = /^\/clients\/([^/]+)$/.exec(path);
+    return match?.[1] ?? null;
+  }, [path]);
+
   return (
     <>
       <header className="app-header">
@@ -75,10 +82,15 @@ export function App() {
         <nav>
           <a className={path === "/" ? "active" : ""} href="/">Dashboard</a>
           <a className={path.startsWith("/leads") ? "active" : ""} href="/leads">Leads</a>
+          <a className={path.startsWith("/clients") ? "active" : ""} href="/clients">Clients</a>
         </nav>
       </header>
 
-      {leadId ? (
+      {clientId ? (
+        <ClientDetailPage clientId={clientId} />
+      ) : path === "/clients" ? (
+        <ClientsPage />
+      ) : leadId ? (
         <LeadDetailPage leadId={leadId} onChanged={() => void loadSummary()} />
       ) : path === "/leads" ? (
         <LeadsPage onLeadCreated={() => void loadSummary()} />

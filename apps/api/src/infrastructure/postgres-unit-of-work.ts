@@ -1,5 +1,6 @@
 import type { Pool, PoolClient } from "pg";
 import type { TransactionRepositories, UnitOfWork } from "../application/ports.js";
+import { PostgresClientRepository } from "./postgres-client-repository.js";
 import { PostgresLeadRepository } from "./postgres-lead-repository.js";
 
 export class PostgresUnitOfWork implements UnitOfWork {
@@ -13,7 +14,8 @@ export class PostgresUnitOfWork implements UnitOfWork {
     try {
       await client.query("begin");
       const result = await work({
-        leads: new PostgresLeadRepository(client)
+        leads: new PostgresLeadRepository(client),
+        clients: new PostgresClientRepository(client)
       });
       await client.query("commit");
 

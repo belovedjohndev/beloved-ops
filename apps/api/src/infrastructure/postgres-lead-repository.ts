@@ -361,6 +361,25 @@ export class PostgresLeadRepository implements LeadRepository {
     return row ? mapLead(row) : null;
   }
 
+  public async markLeadConverted(
+    context: TenantContext,
+    leadId: string,
+    clientId: string
+  ): Promise<LeadDto | null> {
+    const result = await this.db.query<LeadRow>(
+      `
+        update leads
+        set stage = 'won', won_client_id = $3, lost_reason = null
+        where tenant_id = $1 and id = $2 and won_client_id is null
+        returning *
+      `,
+      [context.tenantId, leadId, clientId]
+    );
+    const row = firstRow(result);
+
+    return row ? mapLead(row) : null;
+  }
+
   public async addNote(
     context: TenantContext,
     leadId: string,

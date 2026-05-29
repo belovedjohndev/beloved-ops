@@ -436,6 +436,11 @@ textarea:focus {
   grid-template-columns: minmax(220px, 1.4fr) repeat(6, minmax(96px, 1fr));
 }
 
+.client-list-heading,
+.client-row {
+  grid-template-columns: minmax(220px, 1.3fr) repeat(5, minmax(110px, 1fr));
+}
+
 .lead-list-heading {
   border-bottom: 1px solid var(--dark-08);
   color: var(--dark-64);
@@ -570,6 +575,15 @@ textarea:focus {
   border-bottom: 1px solid var(--color-dark);
   display: inline-flex;
   margin-bottom: 20px;
+}
+
+.inline-link {
+  margin-bottom: 0;
+}
+
+.conversion-panel {
+  border-left: 3px solid var(--color-mint);
+  padding-left: 18px;
 }
 
 @media (max-width: 1100px) {

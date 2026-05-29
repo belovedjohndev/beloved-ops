@@ -1,4 +1,7 @@
 import type {
+  ClientDetailDto,
+  ClientListResponse,
+  ConvertLeadToClientResponse,
   CreateLeadFollowUpRequest,
   CreateLeadNoteRequest,
   CreateLeadRequest,
@@ -37,6 +40,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export async function getDashboardSummary(): Promise<DashboardSummaryDto> {
   return request<DashboardSummaryDto>("/api/dashboard/summary");
+}
+
+export async function listClients(): Promise<ClientListResponse> {
+  return request<ClientListResponse>("/api/clients");
+}
+
+export async function getClientDetail(clientId: string): Promise<ClientDetailDto> {
+  return request<ClientDetailDto>(`/api/clients/${clientId}`);
 }
 
 export async function listLeads(filters: LeadListFilters): Promise<LeadListResponse> {
@@ -112,4 +123,12 @@ export async function completeLeadFollowUp(
   });
 
   return getLeadDetail(leadId);
+}
+
+export async function convertLeadToClient(
+  leadId: string
+): Promise<ConvertLeadToClientResponse> {
+  return request<ConvertLeadToClientResponse>(`/api/leads/${leadId}/convert-to-client`, {
+    method: "POST"
+  });
 }

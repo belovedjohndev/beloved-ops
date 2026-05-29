@@ -6,6 +6,11 @@ import { devTenantContext } from "../config/dev-context.js";
 import type { ApiEnv } from "../config/env.js";
 import { ApplicationError, badRequest } from "../application/errors.js";
 import {
+  convertLeadToClient,
+  getClientDetail,
+  listClients
+} from "../application/client-use-cases.js";
+import {
   addLeadNote,
   completeLeadFollowUp,
   createLead,
@@ -17,12 +22,14 @@ import {
   updateLeadStage
 } from "../application/lead-use-cases.js";
 import type { ApplicationDependencies, LeadFilters } from "../application/ports.js";
+import { PostgresClientRepository } from "../infrastructure/postgres-client-repository.js";
 import { PostgresLeadRepository } from "../infrastructure/postgres-lead-repository.js";
 import { PostgresUnitOfWork } from "../infrastructure/postgres-unit-of-work.js";
 
 type RouteMatch = {
   leadId?: string;
   followUpId?: string;
+  clientId?: string;
 };
 
 function writeJson(response: ServerResponse, statusCode: number, body: unknown): void {
@@ -110,6 +117,16 @@ function matchLeadFollowUpComplete(pathname: string): RouteMatch | null {
   return match?.[1] && match[2] ? { leadId: match[1], followUpId: match[2] } : null;
 }
 
+function matchLeadConversion(pathname: string): RouteMatch | null {
+  const match = /^\/api\/leads\/([^/]+)\/convert-to-client$/.exec(pathname);
+  return match?.[1] ? { leadId: match[1] } : null;
+}
+
+function matchClientDetail(pathname: string): RouteMatch | null {
+  const match = /^\/api\/clients\/([^/]+)$/.exec(pathname);
+  return match?.[1] ? { clientId: match[1] } : null;
+}
+
 async function handleApiRequest(
   request: IncomingMessage,
   response: ServerResponse,
@@ -139,6 +156,22 @@ async function handleApiRequest(
     return;
   }
 
+  if (method === "GET" && url.pathname === "/api/clients") {
+    writeJson(response, 200, await listClients(dependencies, context));
+    return;
+  }
+
+  const clientDetailMatch = matchClientDetail(url.pathname);
+
+  if (clientDetailMatch?.clientId && method === "GET") {
+    writeJson(
+      response,
+      200,
+      await getClientDetail(dependencies, context, clientDetailMatch.clientId)
+    );
+    return;
+  }
+
   const detailMatch = matchLeadDetail(url.pathname);
 
   if (detailMatch?.leadId && method === "GET") {
@@ -162,6 +195,17 @@ async function handleApiRequest(
       response,
       200,
       await updateLeadStage(dependencies, context, stageMatch.leadId, await readJsonBody(request))
+    );
+    return;
+  }
+
+  const conversionMatch = matchLeadConversion(url.pathname);
+
+  if (conversionMatch?.leadId && method === "POST") {
+    writeJson(
+      response,
+      201,
+      await convertLeadToClient(dependencies, context, conversionMatch.leadId)
     );
     return;
   }
@@ -224,6 +268,7 @@ function handleError(response: ServerResponse, error: unknown): void {
 
 export function createApiServer(pool: Pool, env: ApiEnv): Server {
   const dependencies: ApplicationDependencies = {
+    clients: new PostgresClientRepository(pool),
     leads: new PostgresLeadRepository(pool),
     unitOfWork: new PostgresUnitOfWork(pool)
   };

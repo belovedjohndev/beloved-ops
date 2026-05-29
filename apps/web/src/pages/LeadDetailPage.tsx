@@ -10,6 +10,7 @@ import type { LeadNoteType, LeadStage } from "@belovedops/domain";
 import {
   addLeadNote,
   completeLeadFollowUp,
+  convertLeadToClient,
   getLeadDetail,
   scheduleLeadFollowUp,
   updateLeadStage
@@ -29,6 +30,7 @@ export function LeadDetailPage({ leadId, onChanged }: LeadDetailPageProps) {
   const [followUpTitle, setFollowUpTitle] = useState("");
   const [followUpDueAt, setFollowUpDueAt] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isConverting, setIsConverting] = useState(false);
 
   async function loadDetail(): Promise<void> {
     setError(null);
@@ -116,6 +118,27 @@ export function LeadDetailPage({ leadId, onChanged }: LeadDetailPageProps) {
     }
   }
 
+  async function submitConversion(): Promise<void> {
+    setError(null);
+    setIsConverting(true);
+
+    try {
+      const result = await convertLeadToClient(leadId);
+      setDetail(await getLeadDetail(leadId));
+      onChanged();
+      window.history.pushState({}, "", `/clients/${result.client.id}`);
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    } catch (conversionError) {
+      setError(
+        conversionError instanceof Error
+          ? conversionError.message
+          : "Unable to convert lead to client."
+      );
+    } finally {
+      setIsConverting(false);
+    }
+  }
+
   if (!detail) {
     return (
       <main className="page-shell">
@@ -153,6 +176,32 @@ export function LeadDetailPage({ leadId, onChanged }: LeadDetailPageProps) {
           </dl>
         </article>
 
+        <article className="operations-section conversion-panel">
+          <h2>Client conversion</h2>
+          {detail.lead.wonClientId ? (
+            <>
+              <p>This lead has been converted. Proposal notes, follow-ups, decisions, and activity remain preserved here.</p>
+              <a className="primary-action" href={`/clients/${detail.lead.wonClientId}`}>
+                Open client record
+              </a>
+            </>
+          ) : (
+            <>
+              <p>Create a client record from this lead without losing the original lead history.</p>
+              <button
+                className="primary-action"
+                disabled={isConverting}
+                type="button"
+                onClick={() => void submitConversion()}
+              >
+                {isConverting ? "Converting" : "Convert to client"}
+              </button>
+            </>
+          )}
+        </article>
+      </section>
+
+      <section className="detail-grid">
         <form className="operations-section" onSubmit={(event) => void submitStage(event)}>
           <h2>Stage control</h2>
           <label>

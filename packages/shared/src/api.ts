@@ -1,4 +1,5 @@
 import type {
+  ClientStatus,
   LeadActivityEventType,
   LeadNoteType,
   LeadPriority,
@@ -62,6 +63,51 @@ export type ActivityEventDto = {
   eventType: LeadActivityEventType;
   metadataJson: Record<string, unknown>;
   createdAt: string;
+};
+
+export type ClientDto = {
+  id: string;
+  tenantId: string;
+  name: string;
+  companyName: string | null;
+  websiteUrl: string | null;
+  sourceLeadId: string | null;
+  status: ClientStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ClientContactDto = {
+  id: string;
+  tenantId: string;
+  clientId: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  role: string | null;
+  isPrimary: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ClientListItemDto = ClientDto & {
+  primaryContact: ClientContactDto | null;
+};
+
+export type ClientListResponse = {
+  clients: ClientListItemDto[];
+};
+
+export type ClientDetailDto = {
+  client: ClientDto;
+  contacts: ClientContactDto[];
+  sourceLead: LeadDto | null;
+};
+
+export type ConvertLeadToClientResponse = {
+  lead: LeadDto;
+  client: ClientDto;
+  primaryContact: ClientContactDto | null;
 };
 
 export type LeadDetailDto = {

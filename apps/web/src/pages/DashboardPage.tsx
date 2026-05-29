@@ -113,7 +113,8 @@ function formatActivityEvent(eventType: string): string {
     "lead.follow_up_scheduled": "Follow-up scheduled",
     "lead.follow_up_completed": "Follow-up completed",
     "lead.marked_won": "Lead marked won",
-    "lead.marked_lost": "Lead marked lost"
+    "lead.marked_lost": "Lead marked lost",
+    lead_converted_to_client: "Lead converted to client"
   };
 
   return labels[eventType] ?? eventType.replaceAll(".", " ");
