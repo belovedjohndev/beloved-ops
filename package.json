@@ -1,0 +1,27 @@
+{
+  "name": "belovedops",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Internal client operations system for Beloved John Dev.",
+  "type": "module",
+  "packageManager": "npm@10.8.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "check": "npm run typecheck",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "dev:api": "npm run dev --workspace @belovedops/api",
+    "dev:web": "npm run dev --workspace @belovedops/web",
+    "db:migrate": "npm run db:migrate --workspace @belovedops/database",
+    "verify:migrations": "npm run verify:migrations --workspace @belovedops/database"
+  },
+  "engines": {
+    "node": ">=20.11.0",
+    "npm": ">=10.0.0"
+  }
+}
