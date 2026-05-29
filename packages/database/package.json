@@ -9,8 +9,8 @@
   "types": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "db:migrate": "tsx src/migrate.ts",
-    "verify:migrations": "tsx src/migrate.ts --verify"
+    "db:migrate": "node --env-file-if-exists=../../.env --import tsx src/migrate.ts",
+    "verify:migrations": "node --env-file-if-exists=../../.env --import tsx src/migrate.ts --verify"
   },
   "dependencies": {
     "pg": "^8.13.1"

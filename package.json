@@ -10,6 +10,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "concurrently -n api,web -c auto \"npm run dev:api\" \"npm run dev:web\"",
     "check": "npm run typecheck",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
@@ -19,6 +20,9 @@
     "dev:web": "npm run dev --workspace @belovedops/web",
     "db:migrate": "npm run db:migrate --workspace @belovedops/database",
     "verify:migrations": "npm run verify:migrations --workspace @belovedops/database"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   },
   "engines": {
     "node": ">=20.11.0",
