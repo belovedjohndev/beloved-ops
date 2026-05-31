@@ -28,13 +28,6 @@
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "skipLibCheck": false,
-    "noEmit": true,
-    "ignoreDeprecations": "5.0",
-    "baseUrl": ".",
-    "paths": {
-      "@belovedops/domain": ["packages/domain/src/index.ts"],
-      "@belovedops/shared": ["packages/shared/src/index.ts"],
-      "@belovedops/database": ["packages/database/src/index.ts"]
-    }
+    "noEmit": true
   }
 }
