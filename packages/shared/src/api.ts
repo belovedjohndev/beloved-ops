@@ -3,8 +3,12 @@ import type {
   LeadActivityEventType,
   LeadNoteType,
   LeadPriority,
-  LeadStage
+  LeadStage,
+  ProjectActivityEventType,
+  ProjectStatus
 } from "@belovedops/domain";
+
+export type ActivityEventType = LeadActivityEventType | ProjectActivityEventType;
 
 export type LeadDto = {
   id: string;
@@ -58,11 +62,70 @@ export type ActivityEventDto = {
   id: string;
   tenantId: string;
   actorUserId: string;
-  entityType: "lead";
+  entityType: "lead" | "project";
   entityId: string;
-  eventType: LeadActivityEventType;
+  eventType: ActivityEventType;
   metadataJson: Record<string, unknown>;
   createdAt: string;
+};
+
+export type ProjectDto = {
+  id: string;
+  tenantId: string;
+  clientId: string;
+  sourceLeadId: string | null;
+  name: string;
+  status: ProjectStatus;
+  description: string | null;
+  scopeSummary: string | null;
+  budgetAmount: number | null;
+  currency: string;
+  startDate: string | null;
+  targetLaunchDate: string | null;
+  launchedAt: string | null;
+  completedAt: string | null;
+  repoUrl: string | null;
+  stagingUrl: string | null;
+  productionUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ProjectListItemDto = ProjectDto & {
+  client: ClientDto;
+};
+
+export type ProjectListResponse = {
+  projects: ProjectListItemDto[];
+};
+
+export type ProjectDetailDto = {
+  project: ProjectDto;
+  client: ClientDto;
+  sourceLead: LeadDto | null;
+  activity: ActivityEventDto[];
+};
+
+export type CreateProjectRequest = {
+  clientId: string;
+  sourceLeadId?: string | null;
+  name: string;
+  status?: ProjectStatus;
+  description?: string | null;
+  scopeSummary?: string | null;
+  budgetAmount?: number | null;
+  currency?: string;
+  startDate?: string | null;
+  targetLaunchDate?: string | null;
+  repoUrl?: string | null;
+  stagingUrl?: string | null;
+  productionUrl?: string | null;
+};
+
+export type UpdateProjectRequest = Partial<Omit<CreateProjectRequest, "clientId">>;
+
+export type UpdateProjectStatusRequest = {
+  status: ProjectStatus;
 };
 
 export type ClientDto = {
@@ -102,6 +165,7 @@ export type ClientDetailDto = {
   client: ClientDto;
   contacts: ClientContactDto[];
   sourceLead: LeadDto | null;
+  projects: ProjectDto[];
 };
 
 export type ConvertLeadToClientResponse = {
@@ -164,5 +228,8 @@ export type DashboardSummaryDto = {
   overdueFollowUps: number;
   wonLeadsThisMonth: number;
   lostLeadsThisMonth: number;
+  activeProjects: number;
+  projectsInReview: number;
+  launchesUpcoming: number;
   recentActivity: ActivityEventDto[];
 };

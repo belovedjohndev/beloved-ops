@@ -5,11 +5,17 @@ import type {
   CreateLeadFollowUpRequest,
   CreateLeadNoteRequest,
   CreateLeadRequest,
+  CreateProjectRequest,
   DashboardSummaryDto,
   LeadDetailDto,
   LeadDto,
   LeadListResponse,
-  UpdateLeadStageRequest
+  ProjectDetailDto,
+  ProjectDto,
+  ProjectListResponse,
+  UpdateLeadStageRequest,
+  UpdateProjectRequest,
+  UpdateProjectStatusRequest
 } from "@belovedops/shared";
 import type { LeadPriority, LeadStage } from "@belovedops/domain";
 
@@ -48,6 +54,51 @@ export async function listClients(): Promise<ClientListResponse> {
 
 export async function getClientDetail(clientId: string): Promise<ClientDetailDto> {
   return request<ClientDetailDto>(`/api/clients/${clientId}`);
+}
+
+export async function listProjects(): Promise<ProjectListResponse> {
+  return request<ProjectListResponse>("/api/projects");
+}
+
+export async function createProject(input: CreateProjectRequest): Promise<ProjectDto> {
+  return request<ProjectDto>("/api/projects", {
+    method: "POST",
+    body: JSON.stringify(input)
+  });
+}
+
+export async function createClientProject(
+  clientId: string,
+  input: Omit<CreateProjectRequest, "clientId">
+): Promise<ProjectDto> {
+  return request<ProjectDto>(`/api/clients/${clientId}/projects`, {
+    method: "POST",
+    body: JSON.stringify(input)
+  });
+}
+
+export async function getProjectDetail(projectId: string): Promise<ProjectDetailDto> {
+  return request<ProjectDetailDto>(`/api/projects/${projectId}`);
+}
+
+export async function updateProject(
+  projectId: string,
+  input: UpdateProjectRequest
+): Promise<ProjectDto> {
+  return request<ProjectDto>(`/api/projects/${projectId}`, {
+    method: "PATCH",
+    body: JSON.stringify(input)
+  });
+}
+
+export async function updateProjectStatus(
+  projectId: string,
+  input: UpdateProjectStatusRequest
+): Promise<ProjectDto> {
+  return request<ProjectDto>(`/api/projects/${projectId}/status`, {
+    method: "POST",
+    body: JSON.stringify(input)
+  });
 }
 
 export async function listLeads(filters: LeadListFilters): Promise<LeadListResponse> {

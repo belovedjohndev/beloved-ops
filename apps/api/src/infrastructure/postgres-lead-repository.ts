@@ -10,7 +10,13 @@ import type {
   LeadNoteDto,
   UpdateLeadRequest
 } from "@belovedops/shared";
-import type { LeadActivityEventType, LeadNoteType, LeadPriority, LeadStage } from "@belovedops/domain";
+import type {
+  LeadActivityEventType,
+  LeadNoteType,
+  LeadPriority,
+  LeadStage,
+  ProjectActivityEventType
+} from "@belovedops/domain";
 import type {
   ActivityEventInput,
   LeadFilters,
@@ -78,9 +84,9 @@ type ActivityRow = {
   id: string;
   tenant_id: string;
   actor_user_id: string;
-  entity_type: "lead";
+  entity_type: "lead" | "project";
   entity_id: string;
-  event_type: LeadActivityEventType;
+  event_type: LeadActivityEventType | ProjectActivityEventType;
   metadata_json: Record<string, unknown>;
   created_at: Date;
 };
@@ -500,6 +506,9 @@ export class PostgresLeadRepository implements LeadRepository {
         overdue_follow_ups: string;
         won_leads_this_month: string;
         lost_leads_this_month: string;
+        active_projects: string;
+        projects_in_review: string;
+        launches_upcoming: string;
       }>(
         `
           select
@@ -521,7 +530,28 @@ export class PostgresLeadRepository implements LeadRepository {
                 and due_at < now()
             ) as overdue_follow_ups,
             count(*) filter (where stage = 'won' and updated_at >= date_trunc('month', now()))::text as won_leads_this_month,
-            count(*) filter (where stage = 'lost' and updated_at >= date_trunc('month', now()))::text as lost_leads_this_month
+            count(*) filter (where stage = 'lost' and updated_at >= date_trunc('month', now()))::text as lost_leads_this_month,
+            (
+              select count(*)::text
+              from projects
+              where tenant_id = $1
+                and status not in ('completed', 'cancelled')
+            ) as active_projects,
+            (
+              select count(*)::text
+              from projects
+              where tenant_id = $1
+                and status in ('client_review', 'revision', 'ready_to_launch')
+            ) as projects_in_review,
+            (
+              select count(*)::text
+              from projects
+              where tenant_id = $1
+                and target_launch_date is not null
+                and target_launch_date >= current_date
+                and target_launch_date < current_date + interval '30 days'
+                and status not in ('completed', 'cancelled', 'launched')
+            ) as launches_upcoming
           from leads
           where tenant_id = $1
         `,
@@ -541,6 +571,9 @@ export class PostgresLeadRepository implements LeadRepository {
       overdueFollowUps: Number(row?.overdue_follow_ups ?? 0),
       wonLeadsThisMonth: Number(row?.won_leads_this_month ?? 0),
       lostLeadsThisMonth: Number(row?.lost_leads_this_month ?? 0),
+      activeProjects: Number(row?.active_projects ?? 0),
+      projectsInReview: Number(row?.projects_in_review ?? 0),
+      launchesUpcoming: Number(row?.launches_upcoming ?? 0),
       recentActivity: activity.rows.map(mapActivity)
     };
   }

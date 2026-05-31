@@ -6,6 +6,8 @@ import { ClientDetailPage } from "./pages/ClientDetailPage.js";
 import { ClientsPage } from "./pages/ClientsPage.js";
 import { LeadDetailPage } from "./pages/LeadDetailPage.js";
 import { LeadsPage } from "./pages/LeadsPage.js";
+import { ProjectDetailPage } from "./pages/ProjectDetailPage.js";
+import { ProjectsPage } from "./pages/ProjectsPage.js";
 
 export function App() {
   const [path, setPath] = useState(window.location.pathname);
@@ -68,6 +70,11 @@ export function App() {
     return match?.[1] ?? null;
   }, [path]);
 
+  const projectId = useMemo(() => {
+    const match = /^\/projects\/([^/]+)$/.exec(path);
+    return match?.[1] ?? null;
+  }, [path]);
+
   return (
     <>
       <header className="app-header">
@@ -83,6 +90,7 @@ export function App() {
           <a className={path === "/" ? "active" : ""} href="/">Dashboard</a>
           <a className={path.startsWith("/leads") ? "active" : ""} href="/leads">Leads</a>
           <a className={path.startsWith("/clients") ? "active" : ""} href="/clients">Clients</a>
+          <a className={path.startsWith("/projects") ? "active" : ""} href="/projects">Projects</a>
         </nav>
       </header>
 
@@ -90,6 +98,10 @@ export function App() {
         <ClientDetailPage clientId={clientId} />
       ) : path === "/clients" ? (
         <ClientsPage />
+      ) : projectId ? (
+        <ProjectDetailPage projectId={projectId} onChanged={() => void loadSummary()} />
+      ) : path === "/projects" ? (
+        <ProjectsPage />
       ) : leadId ? (
         <LeadDetailPage leadId={leadId} onChanged={() => void loadSummary()} />
       ) : path === "/leads" ? (

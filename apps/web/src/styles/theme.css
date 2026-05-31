@@ -423,6 +423,14 @@ textarea:focus {
   gap: 8px;
 }
 
+.inline-form {
+  border-left: 1px solid var(--dark-16);
+  display: grid;
+  gap: 14px;
+  margin: 18px 0;
+  padding-left: 18px;
+}
+
 .lead-list {
   display: grid;
   margin-top: 16px;
@@ -438,6 +446,16 @@ textarea:focus {
 
 .client-list-heading,
 .client-row {
+  grid-template-columns: minmax(220px, 1.3fr) repeat(5, minmax(110px, 1fr));
+}
+
+.project-list:not(.compact-list) .project-list-heading,
+.project-list:not(.compact-list) .project-row {
+  grid-template-columns: minmax(220px, 1.25fr) minmax(130px, 0.9fr) minmax(130px, 0.9fr) minmax(120px, 0.8fr) minmax(130px, 0.9fr) minmax(120px, 0.8fr) minmax(100px, 0.7fr);
+}
+
+.compact-list .project-list-heading,
+.compact-list .project-row {
   grid-template-columns: minmax(220px, 1.3fr) repeat(5, minmax(110px, 1fr));
 }
 

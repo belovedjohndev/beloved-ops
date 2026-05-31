@@ -4,6 +4,7 @@ import type {
   ClientDto,
   ClientListItemDto,
   ConvertLeadToClientResponse,
+  CreateProjectRequest,
   CreateLeadFollowUpRequest,
   CreateLeadNoteRequest,
   CreateLeadRequest,
@@ -12,9 +13,19 @@ import type {
   LeadDto,
   LeadFollowUpDto,
   LeadNoteDto,
+  ProjectDetailDto,
+  ProjectDto,
+  ProjectListItemDto,
+  UpdateProjectRequest,
   UpdateLeadRequest
 } from "@belovedops/shared";
-import type { LeadActivityEventType, LeadPriority, LeadStage } from "@belovedops/domain";
+import type {
+  LeadActivityEventType,
+  LeadPriority,
+  LeadStage,
+  ProjectActivityEventType,
+  ProjectStatus
+} from "@belovedops/domain";
 
 export type TenantRole = "owner" | "admin" | "member" | "viewer";
 
@@ -39,9 +50,9 @@ export type NormalizedCreateLeadInput = Required<
 export type NormalizedUpdateLeadInput = UpdateLeadRequest;
 
 export type ActivityEventInput = {
-  entityType: "lead";
+  entityType: "lead" | "project";
   entityId: string;
-  eventType: LeadActivityEventType;
+  eventType: LeadActivityEventType | ProjectActivityEventType;
   metadataJson: Record<string, unknown>;
 };
 
@@ -111,9 +122,35 @@ export type ClientRepository = {
   ): Promise<ConvertLeadToClientResponse["primaryContact"]>;
 };
 
+export type NormalizedCreateProjectInput = Required<
+  Omit<CreateProjectRequest, "status">
+> & {
+  status: ProjectStatus;
+};
+
+export type ProjectRepository = {
+  listProjects(context: TenantContext): Promise<ProjectListItemDto[]>;
+  listProjectsForClient(context: TenantContext, clientId: string): Promise<ProjectDto[]>;
+  getProjectDetail(context: TenantContext, projectId: string): Promise<ProjectDetailDto | null>;
+  getProjectById(context: TenantContext, projectId: string): Promise<ProjectDto | null>;
+  createProject(context: TenantContext, input: NormalizedCreateProjectInput): Promise<ProjectDto>;
+  updateProject(
+    context: TenantContext,
+    projectId: string,
+    input: UpdateProjectRequest
+  ): Promise<ProjectDto | null>;
+  updateProjectStatus(
+    context: TenantContext,
+    projectId: string,
+    status: ProjectStatus
+  ): Promise<ProjectDto | null>;
+  createActivity(context: TenantContext, input: ActivityEventInput): Promise<ActivityEventDto>;
+};
+
 export type TransactionRepositories = {
   leads: LeadRepository;
   clients: ClientRepository;
+  projects: ProjectRepository;
 };
 
 export type UnitOfWork = {
@@ -123,5 +160,6 @@ export type UnitOfWork = {
 export type ApplicationDependencies = {
   leads: LeadRepository;
   clients: ClientRepository;
+  projects: ProjectRepository;
   unitOfWork: UnitOfWork;
 };

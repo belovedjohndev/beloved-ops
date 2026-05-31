@@ -4,7 +4,8 @@ import type {
   ClientDetailDto,
   ClientDto,
   ClientListItemDto,
-  LeadDto
+  LeadDto,
+  ProjectDto
 } from "@belovedops/shared";
 import type { ClientStatus, LeadPriority, LeadStage } from "@belovedops/domain";
 import type {
@@ -13,6 +14,7 @@ import type {
   CreatePrimaryContactInput,
   TenantContext
 } from "../application/ports.js";
+import { type ProjectRow, mapProject } from "./project-mappers.js";
 
 type DbExecutor = {
   query<Row extends QueryResultRow>(
@@ -231,10 +233,18 @@ export class PostgresClientRepository implements ClientRepository {
         : Promise.resolve(null)
     ]);
 
+    const projectsResult = await this.db.query<ProjectRow>(
+      "select * from projects where tenant_id = $1 and client_id = $2 order by created_at desc",
+      [context.tenantId, clientId]
+    );
+
+    const projects: ProjectDto[] = projectsResult.rows.map(mapProject);
+
     return {
       client: mapClient(clientRow),
       contacts: contactsResult.rows.map(mapContact),
-      sourceLead: sourceLeadRow ? mapLead(sourceLeadRow) : null
+      sourceLead: sourceLeadRow ? mapLead(sourceLeadRow) : null,
+      projects
     };
   }
 

@@ -55,12 +55,33 @@ export function DashboardPage({ summary, isLoading, error }: DashboardPageProps)
 
         <div className="metric-group">
           <div className="section-heading compact">
+            <h2>Delivery load</h2>
+            <p>Active client projects and work waiting on review or launch readiness.</p>
+          </div>
+          <div className="metric-grid two-up">
+            <Metric label="Active projects" value={summary?.activeProjects ?? 0} loading={isLoading} />
+            <Metric label="In review" value={summary?.projectsInReview ?? 0} loading={isLoading} />
+          </div>
+        </div>
+
+        <div className="metric-group">
+          <div className="section-heading compact">
             <h2>Outcomes this month</h2>
             <p>Stage outcomes recorded from real lead movement.</p>
           </div>
           <div className="metric-grid two-up">
             <Metric label="Won" value={summary?.wonLeadsThisMonth ?? 0} loading={isLoading} />
             <Metric label="Lost" value={summary?.lostLeadsThisMonth ?? 0} loading={isLoading} />
+          </div>
+        </div>
+
+        <div className="metric-group">
+          <div className="section-heading compact">
+            <h2>Launch window</h2>
+            <p>Projects with a target launch in the next 30 days.</p>
+          </div>
+          <div className="metric-grid two-up single-metric">
+            <Metric label="Upcoming launches" value={summary?.launchesUpcoming ?? 0} loading={isLoading} />
           </div>
         </div>
       </section>
@@ -111,10 +132,12 @@ function formatActivityEvent(eventType: string): string {
     "lead.stage_changed": "Lead stage changed",
     "lead.note_added": "Lead note added",
     "lead.follow_up_scheduled": "Follow-up scheduled",
-    "lead.follow_up_completed": "Follow-up completed",
-    "lead.marked_won": "Lead marked won",
-    "lead.marked_lost": "Lead marked lost",
-    lead_converted_to_client: "Lead converted to client"
+            "lead.follow_up_completed": "Follow-up completed",
+            "lead.marked_won": "Lead marked won",
+            "lead.marked_lost": "Lead marked lost",
+    lead_converted_to_client: "Lead converted to client",
+    project_created: "Project created",
+    project_status_changed: "Project status changed"
   };
 
   return labels[eventType] ?? eventType.replaceAll(".", " ");

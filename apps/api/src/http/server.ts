@@ -21,15 +21,24 @@ import {
   updateLead,
   updateLeadStage
 } from "../application/lead-use-cases.js";
+import {
+  createProject,
+  getProjectDetail,
+  listProjects,
+  updateProject,
+  updateProjectStatus
+} from "../application/project-use-cases.js";
 import type { ApplicationDependencies, LeadFilters } from "../application/ports.js";
 import { PostgresClientRepository } from "../infrastructure/postgres-client-repository.js";
 import { PostgresLeadRepository } from "../infrastructure/postgres-lead-repository.js";
+import { PostgresProjectRepository } from "../infrastructure/postgres-project-repository.js";
 import { PostgresUnitOfWork } from "../infrastructure/postgres-unit-of-work.js";
 
 type RouteMatch = {
   leadId?: string;
   followUpId?: string;
   clientId?: string;
+  projectId?: string;
 };
 
 function writeJson(response: ServerResponse, statusCode: number, body: unknown): void {
@@ -127,6 +136,21 @@ function matchClientDetail(pathname: string): RouteMatch | null {
   return match?.[1] ? { clientId: match[1] } : null;
 }
 
+function matchClientProjects(pathname: string): RouteMatch | null {
+  const match = /^\/api\/clients\/([^/]+)\/projects$/.exec(pathname);
+  return match?.[1] ? { clientId: match[1] } : null;
+}
+
+function matchProjectDetail(pathname: string): RouteMatch | null {
+  const match = /^\/api\/projects\/([^/]+)$/.exec(pathname);
+  return match?.[1] ? { projectId: match[1] } : null;
+}
+
+function matchProjectStatus(pathname: string): RouteMatch | null {
+  const match = /^\/api\/projects\/([^/]+)\/status$/.exec(pathname);
+  return match?.[1] ? { projectId: match[1] } : null;
+}
+
 async function handleApiRequest(
   request: IncomingMessage,
   response: ServerResponse,
@@ -161,6 +185,20 @@ async function handleApiRequest(
     return;
   }
 
+  if (method === "GET" && url.pathname === "/api/projects") {
+    writeJson(response, 200, await listProjects(dependencies, context));
+    return;
+  }
+
+  if (method === "POST" && url.pathname === "/api/projects") {
+    writeJson(
+      response,
+      201,
+      await createProject(dependencies, context, await readJsonBody(request))
+    );
+    return;
+  }
+
   const clientDetailMatch = matchClientDetail(url.pathname);
 
   if (clientDetailMatch?.clientId && method === "GET") {
@@ -168,6 +206,63 @@ async function handleApiRequest(
       response,
       200,
       await getClientDetail(dependencies, context, clientDetailMatch.clientId)
+    );
+    return;
+  }
+
+  const clientProjectsMatch = matchClientProjects(url.pathname);
+
+  if (clientProjectsMatch?.clientId && method === "POST") {
+    writeJson(
+      response,
+      201,
+      await createProject(
+        dependencies,
+        context,
+        await readJsonBody(request),
+        clientProjectsMatch.clientId
+      )
+    );
+    return;
+  }
+
+  const projectDetailMatch = matchProjectDetail(url.pathname);
+
+  if (projectDetailMatch?.projectId && method === "GET") {
+    writeJson(
+      response,
+      200,
+      await getProjectDetail(dependencies, context, projectDetailMatch.projectId)
+    );
+    return;
+  }
+
+  if (projectDetailMatch?.projectId && method === "PATCH") {
+    writeJson(
+      response,
+      200,
+      await updateProject(
+        dependencies,
+        context,
+        projectDetailMatch.projectId,
+        await readJsonBody(request)
+      )
+    );
+    return;
+  }
+
+  const projectStatusMatch = matchProjectStatus(url.pathname);
+
+  if (projectStatusMatch?.projectId && method === "POST") {
+    writeJson(
+      response,
+      200,
+      await updateProjectStatus(
+        dependencies,
+        context,
+        projectStatusMatch.projectId,
+        await readJsonBody(request)
+      )
     );
     return;
   }
@@ -270,6 +365,7 @@ export function createApiServer(pool: Pool, env: ApiEnv): Server {
   const dependencies: ApplicationDependencies = {
     clients: new PostgresClientRepository(pool),
     leads: new PostgresLeadRepository(pool),
+    projects: new PostgresProjectRepository(pool),
     unitOfWork: new PostgresUnitOfWork(pool)
   };
 
