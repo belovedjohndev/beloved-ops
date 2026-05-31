@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --env-file-if-exists=../../.env --watch --import tsx src/main.ts",
     "build": "tsc --noEmit",
+    "start": "node --import tsx src/main.ts",
     "typecheck": "tsc --noEmit",
     "test": "tsc --noEmit"
   },
@@ -13,11 +14,11 @@
     "@belovedops/database": "0.1.0",
     "@belovedops/domain": "0.1.0",
     "@belovedops/shared": "0.1.0",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "tsx": "^4.19.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
 }

@@ -16,11 +16,11 @@ function readRequiredEnv(name: string): string {
 }
 
 export function getApiEnv(): ApiEnv {
-  const apiPortValue = process.env["API_PORT"] ?? "4000";
+  const apiPortValue = process.env["PORT"] ?? process.env["API_PORT"] ?? "4000";
   const apiPort = Number(apiPortValue);
 
   if (!Number.isInteger(apiPort) || apiPort <= 0) {
-    throw new Error("API_PORT must be a positive integer.");
+    throw new Error("PORT or API_PORT must be a positive integer.");
   }
 
   return {
