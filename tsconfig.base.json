@@ -29,6 +29,7 @@
     "esModuleInterop": true,
     "skipLibCheck": false,
     "noEmit": true,
+    "ignoreDeprecations": "5.0",
     "baseUrl": ".",
     "paths": {
       "@belovedops/domain": ["packages/domain/src/index.ts"],
